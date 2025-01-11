@@ -4,10 +4,12 @@ let canvas = null;
 let ctx = null;
 let model = null;
 
-// Load the model from the local directory
+// Load the model using a proxy for CORS workaround
 async function loadModel() {
     try {
-        model = await tf.loadLayersModel('model.json');
+        // Assuming you're running a local proxy server on port 3000
+        const proxyUrl = 'http://localhost:3000/proxy/captain-pool/esrgan-tf2/1';
+        model = await tf.loadGraphModel(proxyUrl, {fromTFHub: true});
         console.log('Model loaded');
     } catch (error) {
         console.error('Failed to load the model:', error);
@@ -36,8 +38,9 @@ function loadImageToCanvas(file) {
 
 // Function to enhance the image
 async function enhanceImage() {
+    console.log("going to enhance")
     if (!model || !image) return;
-    
+    console.log("enhancing")
     // Convert canvas to tensor
     const tensor = tf.browser.fromPixels(canvas).toFloat().expandDims();
     
@@ -45,9 +48,10 @@ async function enhanceImage() {
     const normalized = tensor.div(tf.scalar(255));
     
     // Predict with model
-    const prediction = await model.predict(normalized);
+    const prediction = await model.execute(normalized);
     
     // Convert prediction back to image
+    // Note: Adjust this part based on the model's output format. Here, we assume a single output tensor.
     const enhancedImage = prediction.squeeze().clipByValue(0, 1).mul(255).cast('int32');
     
     // Draw on canvas
@@ -58,6 +62,7 @@ async function enhanceImage() {
     normalized.dispose();
     prediction.dispose();
     enhancedImage.dispose();
+    console.log("enhanced")
 }
 
 // Event listeners

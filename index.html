@@ -15,7 +15,8 @@
 </head>
 <body>
     <h1>Image Enhancer</h1>
-    <input type="file" id="fileInput" accept="image/*">
+    <label for="fileInput">Select an Image:</label>
+    <input type="file" id="fileInput" accept="image/*" title="Select an image to enhance">
     <div id="imageContainer"></div>
     <button id="enhanceBtn">Enhance</button>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
