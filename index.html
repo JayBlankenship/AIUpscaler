@@ -3,22 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Enhancer</title>
+    <title>AI Voxel Upscaler</title>
     <style>
-        canvas {
-            border: 1px solid black;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        #fileInput {
-            margin-bottom: 10px;
+
+        body {
+            background: transparent !important;
+            background-color: transparent !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        html {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        /* Transparent window styling for desktop */
+        .desktop-mode {
+            /* For true transparency, use browser flags. Fallback to subtle dark background */
+            background: rgba(0, 0, 0, 0.05) !important;
+            background-color: rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* Alternative: Completely transparent (requires browser flags) */
+        .desktop-mode.true-transparent {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        /* Mobile camera background */
+        .mobile-mode {
+            background: #000;
+        }
+
+        #cameraBackground {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            display: none;
+        }
+
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 15px 25px;
+            z-index: 1000;
+        }
+
+        #upscaleSlider {
+            width: 200px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        #upscaleSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #upscaleSlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-label {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        #cameraButton {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        #cameraButton:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #cameraButton.active {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        #processingCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0.8;
+            mix-blend-mode: overlay;
+        }
+
+        /* Hide scrollbars */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            #cameraButton {
+                display: block;
+            }
+            
+            #controls {
+                padding: 12px 20px;
+                gap: 15px;
+            }
+            
+            #upscaleSlider {
+                width: 150px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Image Enhancer</h1>
-    <label for="fileInput">Select an Image:</label>
-    <input type="file" id="fileInput" accept="image/*" title="Select an image to enhance">
-    <div id="imageContainer"></div>
-    <button id="enhanceBtn">Enhance</button>
+    <video id="cameraBackground" autoplay muted playsinline></video>
+    
+    <div id="controls">
+        <span class="slider-label">1x</span>
+        <input type="range" id="upscaleSlider" min="1" max="4" value="1" step="0.1">
+        <span class="slider-label">4x</span>
+        <button id="cameraButton">📷 Camera</button>
+    </div>
+
+    <canvas id="processingCanvas"></canvas>
+
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="app.js"></script>
 </body>
